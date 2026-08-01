@@ -1,10 +1,12 @@
 const output = document.getElementById("output");
 const codeArea = document.getElementById("code");
+const inputContainer = document.getElementById("input-container");
 
 /* ===========================
    AUTO INDENTATION
 =========================== */
-	codeArea.addEventListener("keydown", function (e) {
+
+codeArea.addEventListener("keydown", function (e) {
 
     // TAB
     if (e.key === "Tab") {
@@ -29,48 +31,78 @@ const codeArea = document.getElementById("code");
 
         const start = this.selectionStart;
 
-        const text = this.value;
-
-        const before = text.substring(0, start);
-        const after = text.substring(start);
+        const before = this.value.substring(0, start);
+        const after = this.value.substring(start);
 
         const lineStart = before.lastIndexOf("\n") + 1;
-
         const currentLine = before.substring(lineStart);
 
         let indent = currentLine.match(/^\s*/)[0];
 
         const trimmed = currentLine.trim();
 
-        if (
-            trimmed.endsWith("{") ||
-            trimmed.endsWith(":")
-        ) {
+        if (trimmed.endsWith("{") || trimmed.endsWith(":")) {
             indent += "    ";
         }
 
-        this.value =
-            before +
-            "\n" +
-            indent +
-            after;
+        this.value = before + "\n" + indent + after;
 
-        this.selectionStart = this.selectionEnd =
+        this.selectionStart =
+        this.selectionEnd =
             start + indent.length + 1;
     }
 
 });
 
-      
-        /* ===========================
+
+/* ===========================
+   AUTO SHOW INPUT BOX
+=========================== */
+
+function detectInputRequirement() {
+
+    const code = codeArea.value;
+
+    const patterns = [
+
+        /input\s*\(/i,
+        /scanf\s*\(/i,
+        /cin\s*>>/i,
+        /Scanner/i,
+        /nextInt\s*\(/i,
+        /nextLine\s*\(/i,
+        /nextDouble\s*\(/i,
+        /nextFloat\s*\(/i,
+        /nextLong\s*\(/i,
+        /next\s*\(/i
+
+    ];
+
+    const requiresInput =
+        patterns.some(pattern => pattern.test(code));
+
+    inputContainer.style.display =
+        requiresInput ? "block" : "none";
+}
+
+// Detect while typing
+codeArea.addEventListener("input", detectInputRequirement);
+
+
+/* ===========================
    RUN CODE
 =========================== */
 
 async function runCode() {
 
-    const language = document.getElementById("language").value;
-    const code = document.getElementById("code").value;
-    const input = document.getElementById("input").value;
+    const language =
+        document.getElementById("language").value;
+
+    const code =
+        document.getElementById("code").value;
+
+    const input =
+        document.getElementById("input").value;
 
     output.textContent = "Compiling...";
 
@@ -80,35 +112,48 @@ async function runCode() {
             "https://minimal-engine-retirement-vids.trycloudflare.com/run",
             {
                 method: "POST",
+
                 headers: {
                     "Content-Type": "application/json"
                 },
+
                 body: JSON.stringify({
-                    language: language,
-                    code: code,
-                    input: input
+                    language,
+                    code,
+                    input
                 })
             }
         );
 
         if (!response.ok) {
-            throw new Error(`Server Error: ${response.status}`);
+            throw new Error("Server Error : " + response.status);
         }
 
         const data = await response.json();
 
         if (data.success) {
+
             output.textContent = data.output;
+
         } else {
+
             output.textContent = data.error;
+
         }
 
-    } catch (err) {
+    }
+
+    catch (err) {
+
         console.error(err);
-        output.textContent = "Error: " + err.message;
+
+        output.textContent =
+            "Error : " + err.message;
+
     }
 
 }
+
 
 /* ===========================
    CLEAR
@@ -116,25 +161,29 @@ async function runCode() {
 
 function clearEditor() {
 
-    document.getElementById("code").value = "";
+    codeArea.value = "";
 
     document.getElementById("input").value = "";
 
     output.textContent =
         "Program output will appear here...";
 
+    detectInputRequirement();
+
 }
+
 
 /* ===========================
    LANGUAGE TEMPLATE
 =========================== */
 
-document.getElementById("language")
+document
+.getElementById("language")
 .addEventListener("change", function () {
 
     let lang = this.value;
 
-    if (lang == "java") {
+    if (lang === "java") {
 
         codeArea.value =
 `import java.util.*;
@@ -153,7 +202,7 @@ public class Main {
 
     }
 
-    else if (lang == "python") {
+    else if (lang === "python") {
 
         codeArea.value =
 `name = input()
@@ -162,7 +211,7 @@ print("Hello", name)`;
 
     }
 
-    else if (lang == "c") {
+    else if (lang === "c") {
 
         codeArea.value =
 `#include <stdio.h>
@@ -177,7 +226,7 @@ int main() {
 
     }
 
-    else if (lang == "cpp") {
+    else if (lang === "cpp") {
 
         codeArea.value =
 `#include <iostream>
@@ -194,4 +243,14 @@ int main() {
 
     }
 
+    // Show/Hide input box after template changes
+    detectInputRequirement();
+
 });
+
+
+/* ===========================
+   INITIAL STATE
+=========================== */
+
+detectInputRequirement();
