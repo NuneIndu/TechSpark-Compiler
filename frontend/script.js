@@ -109,7 +109,7 @@ async function runCode() {
     try {
 
         const response = await fetch(
-            " https://streets-nat-glen-passengers.trycloudflare.com  ",
+            "https://streets-nat-glen-passengers.trycloudflare.com",
             {
                 method: "POST",
 
