@@ -62,65 +62,50 @@ const codeArea = document.getElementById("code");
 });
 
       
-       
-/* ===========================
+        /* ===========================
    RUN CODE
 =========================== */
 
 async function runCode() {
 
-    const language =
-        document.getElementById("language").value;
+    const language = document.getElementById("language").value;
+    const code = document.getElementById("code").value;
+    const input = document.getElementById("input").value;
 
-    const code =
-        document.getElementById("code").value;
-
-    const input =
-        document.getElementById("input").value;
-
-    output.innerHTML = "Compiling...";
+    output.textContent = "Compiling...";
 
     try {
 
-        const response = await 
-fetch(" https://minimal-engine-retirement-vids.trycloudflare.com", 
+        const response = await fetch(
+            "https://minimal-engine-retirement-vids.trycloudflare.com/run",
             {
                 method: "POST",
-
                 headers: {
                     "Content-Type": "application/json"
                 },
-
                 body: JSON.stringify({
-
                     language: language,
-
                     code: code,
-
                     input: input
-
                 })
+            }
+        );
 
-            });
+        if (!response.ok) {
+            throw new Error(`Server Error: ${response.status}`);
+        }
 
         const data = await response.json();
 
         if (data.success) {
-
             output.textContent = data.output;
-
         } else {
-
             output.textContent = data.error;
-
         }
 
-    }
-
-    catch (err) {
-
-        output.textContent = err;
-
+    } catch (err) {
+        console.error(err);
+        output.textContent = "Error: " + err.message;
     }
 
 }
