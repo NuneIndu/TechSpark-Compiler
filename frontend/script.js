@@ -109,7 +109,7 @@ async function runCode() {
     try {
 
         const response = await fetch(
-            "https://dawn-courts-blogs-debate.trycloudflare.com/run",
+            " https://ignored-indicators-snow-elegant.trycloudflare.com/run",
             {
                 method: "POST",
 
